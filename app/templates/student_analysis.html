@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Student Analysis | Predictive Student Success Monitoring System
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+
+        /* =================================================
+           HEADER
+        ================================================= */
+
+        .header {
+            background: #1f3c88;
+            color: white;
+
+            padding: 18px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        .header h1 {
+            font-size: 21px;
+        }
+
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+
+        .header-btn {
+            background: white;
+            color: #1f3c88;
+
+            padding: 9px 15px;
+
+            border-radius: 5px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+
+        .header-btn:hover {
+            background: #e8ecf6;
+        }
+
+
+        /* =================================================
+           MAIN CONTAINER
+        ================================================= */
+
+        .container {
+            width: 94%;
+            max-width: 1250px;
+
+            margin: 30px auto 50px;
+        }
+
+
+        /* =================================================
+           STUDENT HEADER
+        ================================================= */
+
+        .student-header {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .student-header h2 {
+            margin-bottom: 8px;
+            color: #1f3c88;
+        }
+
+
+        .student-header p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+
+        /* =================================================
+           RISK SECTION
+        ================================================= */
+
+        .risk-section {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .risk-card {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .risk-card h3 {
+            font-size: 15px;
+            color: #666;
+
+            margin-bottom: 12px;
+        }
+
+
+        .risk-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+
+        .high-card {
+            border-left: 5px solid #dc3545;
+        }
+
+
+        .medium-card {
+            border-left: 5px solid #ffc107;
+        }
+
+
+        .low-card {
+            border-left: 5px solid #28a745;
+        }
+
+
+        .priority-card {
+            border-left: 5px solid #1f3c88;
+        }
+
+
+        /* =================================================
+           RISK BADGE
+        ================================================= */
+
+        .risk-badge {
+            display: inline-block;
+
+            padding: 8px 15px;
+
+            border-radius: 20px;
+
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+
+        .risk-high {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+
+        .risk-medium {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+
+        .risk-low {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        /* =================================================
+           SECTION CARD
+        ================================================= */
+
+        .section-card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .section-card h2 {
+            color: #1f3c88;
+
+            margin-bottom: 20px;
+
+            font-size: 20px;
+        }
+
+
+        /* =================================================
+           RISK MESSAGE
+        ================================================= */
+
+        .risk-message {
+            line-height: 1.7;
+
+            background: #f7f9fc;
+
+            padding: 16px;
+
+            border-radius: 7px;
+
+            border-left: 4px solid #1f3c88;
+        }
+
+
+        /* =================================================
+           ACADEMIC GRID
+        ================================================= */
+
+        .academic-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 15px;
+        }
+
+
+        .academic-item {
+            background: #f7f9fc;
+
+            padding: 16px;
+
+            border-radius: 7px;
+        }
+
+
+        .academic-item .label {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .academic-item .value {
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+
+        /* =================================================
+           FACTORS TABLE
+        ================================================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+        }
+
+
+        th {
+            background: #f0f3f8;
+
+            padding: 13px;
+
+            text-align: left;
+
+            font-size: 14px;
+        }
+
+
+        td {
+            padding: 13px;
+
+            border-bottom:
+                1px solid #e5e5e5;
+
+            font-size: 14px;
+        }
+
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+
+        .impact {
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+
+        /* =================================================
+           INTERVENTIONS
+        ================================================= */
+
+        .intervention {
+            border: 1px solid #e2e5e9;
+
+            border-radius: 8px;
+
+            padding: 18px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .intervention:last-child {
+            margin-bottom: 0;
+        }
+
+
+        .intervention h3 {
+            color: #1f3c88;
+
+            margin-bottom: 10px;
+        }
+
+
+        .intervention p {
+            line-height: 1.6;
+
+            margin-top: 7px;
+        }
+
+
+        .intervention-meta {
+            margin-top: 13px;
+
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 10px;
+        }
+
+
+        .meta-badge {
+            padding: 5px 10px;
+
+            border-radius: 15px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+
+            background: #e9ecef;
+        }
+
+
+        .priority-immediate {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+
+        .priority-moderate {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+
+        .priority-routine {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        .status-pending {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+
+        .status-progress {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+
+        .status-completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        /* =================================================
+           EMPTY MESSAGE
+        ================================================= */
+
+        .empty-message {
+            color: #777;
+
+            padding: 15px;
+
+            background: #f7f9fc;
+
+            border-radius: 6px;
+        }
+
+
+        /* =================================================
+           RESPONSIVE
+        ================================================= */
+
+        @media (max-width: 768px) {
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+
+                gap: 12px;
+            }
+
+
+            .container {
+                width: 96%;
+            }
+
+
+            .header-actions {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <header class="header">
+
+        <h1>
+            Predictive Student Success Monitoring System
+        </h1>
+
+
+        <div class="header-actions">
+
+            <a
+                href="{{ url_for('faculty_dashboard') }}"
+                class="header-btn"
+            >
+                Dashboard
+            </a>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="header-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="container">
+
+
+        <!-- =================================================
+             STUDENT INFORMATION
+        ================================================== -->
+
+        <section class="student-header">
+
+            <h2>
+                {{ student.student_name }}
+            </h2>
+
+
+            <p>
+                <strong>Register Number:</strong>
+                {{ student.register_number }}
+            </p>
+
+
+            <p>
+                <strong>Department:</strong>
+                {{ student.department }}
+            </p>
+
+
+            <p>
+                <strong>Semester:</strong>
+                {{ student.semester }}
+            </p>
+
+
+            {% if student.email %}
+
+                <p>
+                    <strong>Email:</strong>
+                    {{ student.email }}
+                </p>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             RISK OVERVIEW
+        ================================================== -->
+
+        <section class="risk-section">
+
+
+            <div class="risk-card">
+
+                <h3>
+                    Predicted Risk Level
+                </h3>
+
+
+                {% if prediction.risk_level == "High" %}
+
+                    <span class="risk-badge risk-high">
+                        High Risk
+                    </span>
+
+
+                {% elif prediction.risk_level == "Medium" %}
+
+                    <span class="risk-badge risk-medium">
+                        Medium Risk
+                    </span>
+
+
+                {% else %}
+
+                    <span class="risk-badge risk-low">
+                        Low Risk
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+
+            <div class="risk-card high-card">
+
+                <h3>
+                    High Risk Probability
+                </h3>
+
+                <div class="risk-value">
+                    {{ probabilities.High }}%
+                </div>
+
+            </div>
+
+
+
+            <div class="risk-card medium-card">
+
+                <h3>
+                    Medium Risk Probability
+                </h3>
+
+                <div class="risk-value">
+                    {{ probabilities.Medium }}%
+                </div>
+
+            </div>
+
+
+
+            <div class="risk-card low-card">
+
+                <h3>
+                    Low Risk Probability
+                </h3>
+
+                <div class="risk-value">
+                    {{ probabilities.Low }}%
+                </div>
+
+            </div>
+
+
+
+            <div class="risk-card priority-card">
+
+                <h3>
+                    Intervention Priority
+                </h3>
+
+                <div class="risk-value">
+                    {{ priority }}
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             ACADEMIC GUIDANCE
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                Academic Risk Guidance
+            </h2>
+
+
+            <div class="risk-message">
+
+                {{ risk_message }}
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ACADEMIC PERFORMANCE
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                Academic Performance
+            </h2>
+
+
+            {% if academic %}
+
+                <div class="academic-grid">
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Previous GPA
+                        </div>
+
+                        <div class="value">
+                            {{ academic.previous_gpa }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Attendance
+                        </div>
+
+                        <div class="value">
+                            {{ academic.attendance_pct }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Internal Assessment 1
+                        </div>
+
+                        <div class="value">
+                            {{ academic.internal_1 }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Internal Assessment 2
+                        </div>
+
+                        <div class="value">
+                            {{ academic.internal_2 }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Assignment Average
+                        </div>
+
+                        <div class="value">
+                            {{ academic.assignment_avg }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Assignment Completion
+                        </div>
+
+                        <div class="value">
+                            {{ academic.assignment_completion_pct }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Quiz Average
+                        </div>
+
+                        <div class="value">
+                            {{ academic.quiz_avg }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Weekly Study Hours
+                        </div>
+
+                        <div class="value">
+                            {{ academic.study_hours_weekly }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Class Participation
+                        </div>
+
+                        <div class="value">
+                            {{ academic.class_participation }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="label">
+                            Late Submissions
+                        </div>
+
+                        <div class="value">
+                            {{ academic.late_submissions }}
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-message">
+                    No academic record available.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             CONTRIBUTING RISK FACTORS
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                Top Contributing Factors
+            </h2>
+
+
+            {% if risk_factors %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Rank
+                                </th>
+
+                                <th>
+                                    Feature
+                                </th>
+
+                                <th>
+                                    Student Value
+                                </th>
+
+                                <th>
+                                    SHAP Impact
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for factor in risk_factors %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ factor.factor_rank }}
+                                    </td>
+
+                                    <td>
+                                        {{ factor.feature_name }}
+                                    </td>
+
+                                    <td>
+                                        {{ factor.feature_value }}
+                                    </td>
+
+                                    <td class="impact">
+                                        {{ factor.shap_impact }}
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-message">
+                    No contributing factors available.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             PERSONALIZED INTERVENTIONS
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                Personalized Interventions
+            </h2>
+
+
+            {% if interventions %}
+
+
+                {% for intervention in interventions %}
+
+                    <div class="intervention">
+
+
+                        <h3>
+                            {{ loop.index }}.
+                            {{ intervention.title }}
+                        </h3>
+
+
+                        <p>
+
+                            <strong>
+                                Contributing Feature:
+                            </strong>
+
+                            {{ intervention.feature_name }}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Recommendation:
+                            </strong>
+
+                            {{ intervention.recommendation }}
+
+                        </p>
+
+
+                        <div class="intervention-meta">
+
+
+                            {% if intervention.priority == "Immediate" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-immediate
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+
+                            {% elif intervention.priority == "Moderate" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-moderate
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+
+                            {% else %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-routine
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+                            {% endif %}
+
+
+
+                            {% if intervention.status == "Completed" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-completed
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+
+                            {% elif intervention.status == "In Progress" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-progress
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+
+                            {% else %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-pending
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <div class="empty-message">
+                    No interventions available.
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+    </main>
+
+
+</body>
+
+</html>

@@ -15,12 +15,25 @@ USE student_success_db;
 
 CREATE TABLE users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    role ENUM('faculty', 'student') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+    username VARCHAR(100) UNIQUE NOT NULL,
 
+    role ENUM(
+        'faculty',
+        'student'
+    ) NOT NULL,
+
+    student_id INT NULL,
+
+    password_hash VARCHAR(255) NOT NULL,
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_users_student
+        FOREIGN KEY (student_id)
+        REFERENCES students(student_id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
 
 -- =========================================================
 -- 2. STUDENTS

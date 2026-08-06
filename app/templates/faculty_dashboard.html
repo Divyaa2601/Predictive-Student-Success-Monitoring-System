@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Faculty Dashboard | Predictive Student Success Monitoring System
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            background: #1f3c88;
+            color: white;
+            padding: 18px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logout-btn {
+            background: white;
+            color: #1f3c88;
+
+            text-decoration: none;
+
+            padding: 9px 16px;
+            border-radius: 5px;
+
+            font-weight: bold;
+        }
+
+        .logout-btn:hover {
+            background: #e9edf7;
+        }
+
+
+        /* ================================
+           MAIN CONTENT
+        ================================= */
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+
+            margin: 30px auto;
+        }
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+        .welcome h2 {
+            margin-bottom: 5px;
+        }
+
+        .welcome p {
+            color: #666;
+        }
+
+
+        /* ================================
+           SUMMARY CARDS
+        ================================= */
+
+        .summary-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: white;
+
+            border-radius: 8px;
+
+            padding: 20px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .summary-card h3 {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .summary-card .number {
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .total {
+            border-left: 5px solid #1f3c88;
+        }
+
+        .high {
+            border-left: 5px solid #dc3545;
+        }
+
+        .medium {
+            border-left: 5px solid #ffc107;
+        }
+
+        .low {
+            border-left: 5px solid #28a745;
+        }
+
+        .not-analyzed {
+            border-left: 5px solid #6c757d;
+        }
+
+
+        /* ================================
+           TABLE SECTION
+        ================================= */
+
+        .table-card {
+            background: white;
+
+            border-radius: 8px;
+
+            padding: 22px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .table-card h2 {
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f0f3f8;
+            padding: 13px;
+
+            text-align: left;
+
+            font-size: 14px;
+        }
+
+        td {
+            padding: 13px;
+
+            border-bottom:
+                1px solid #e8e8e8;
+
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+
+        /* ================================
+           RISK BADGES
+        ================================= */
+
+        .risk-badge {
+            display: inline-block;
+
+            padding: 6px 11px;
+
+            border-radius: 20px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+        }
+
+        .risk-high {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .risk-medium {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+        .risk-low {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .risk-none {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+
+        /* ================================
+           BUTTONS
+        ================================= */
+
+        .action-btn {
+            display: inline-block;
+
+            padding: 7px 12px;
+
+            border-radius: 5px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        .analyze-btn {
+            background: #1f3c88;
+            color: white;
+        }
+
+        .view-btn {
+            background: #198754;
+            color: white;
+        }
+
+        .action-btn:hover {
+            opacity: 0.88;
+        }
+
+
+        /* ================================
+           FLASH MESSAGES
+        ================================= */
+
+        .flash-message {
+            background: #fff3cd;
+            color: #664d03;
+
+            padding: 12px;
+
+            border-radius: 5px;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* ================================
+           RESPONSIVE
+        ================================= */
+
+        @media (max-width: 768px) {
+
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                width: 96%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =================================
+         HEADER
+    ================================== -->
+
+    <header class="header">
+
+        <div>
+
+            <h1>
+                Predictive Student Success Monitoring System
+            </h1>
+
+        </div>
+
+
+        <div class="header-right">
+
+            <span>
+                {{ faculty.username }}
+            </span>
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+    <!-- =================================
+         MAIN CONTENT
+    ================================== -->
+
+    <main class="container">
+
+
+        <!-- Welcome -->
+
+        <section class="welcome">
+
+            <h2>
+                Faculty Dashboard
+            </h2>
+
+            <p>
+                Monitor student academic performance,
+                risk levels and intervention requirements.
+            </p>
+
+        </section>
+
+
+        <!-- =================================
+             FLASH MESSAGES
+        ================================== -->
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% if messages %}
+
+                {% for category, message in messages %}
+
+                    <div class="flash-message">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            {% endif %}
+
+        {% endwith %}
+
+
+        <!-- =================================
+             SUMMARY CARDS
+        ================================== -->
+
+        <section class="summary-grid">
+
+
+            <div class="summary-card total">
+
+                <h3>
+                    Total Students
+                </h3>
+
+                <div class="number">
+                    {{ summary.total_students }}
+                </div>
+
+            </div>
+
+
+            <div class="summary-card high">
+
+                <h3>
+                    High Risk
+                </h3>
+
+                <div class="number">
+                    {{ summary.high_risk }}
+                </div>
+
+            </div>
+
+
+            <div class="summary-card medium">
+
+                <h3>
+                    Medium Risk
+                </h3>
+
+                <div class="number">
+                    {{ summary.medium_risk }}
+                </div>
+
+            </div>
+
+
+            <div class="summary-card low">
+
+                <h3>
+                    Low Risk
+                </h3>
+
+                <div class="number">
+                    {{ summary.low_risk }}
+                </div>
+
+            </div>
+
+
+            <div class="summary-card not-analyzed">
+
+                <h3>
+                    Not Analyzed
+                </h3>
+
+                <div class="number">
+                    {{ summary.not_analyzed }}
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- =================================
+             STUDENT TABLE
+        ================================== -->
+
+        <section class="table-card">
+
+            <h2>
+                Student Risk Monitoring
+            </h2>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                Register No.
+                            </th>
+
+                            <th>
+                                Student
+                            </th>
+
+                            <th>
+                                Semester
+                            </th>
+
+                            <th>
+                                GPA
+                            </th>
+
+                            <th>
+                                Attendance
+                            </th>
+
+                            <th>
+                                Internal 1
+                            </th>
+
+                            <th>
+                                Internal 2
+                            </th>
+
+                            <th>
+                                Risk Level
+                            </th>
+
+                            <th>
+                                Risk Probability
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                            <tr>
+
+
+                                <td>
+                                    {{ student.register_number }}
+                                </td>
+
+
+                                <td>
+
+                                    <strong>
+                                        {{ student.student_name }}
+                                    </strong>
+
+                                    <br>
+
+                                    <small>
+                                        {{ student.email }}
+                                    </small>
+
+                                </td>
+
+
+                                <td>
+                                    {{ student.semester }}
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.previous_gpa is not none %}
+
+                                        {{ student.previous_gpa }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.attendance_pct is not none %}
+
+                                        {{ student.attendance_pct }}%
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.internal_1 is not none %}
+
+                                        {{ student.internal_1 }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <td>
+
+                                    {% if student.internal_2 is not none %}
+
+                                        {{ student.internal_2 }}
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Risk Level -->
+
+                                <td>
+
+                                    {% if student.risk_level == "High" %}
+
+                                        <span
+                                            class="risk-badge risk-high"
+                                        >
+                                            High
+                                        </span>
+
+
+                                    {% elif student.risk_level == "Medium" %}
+
+                                        <span
+                                            class="risk-badge risk-medium"
+                                        >
+                                            Medium
+                                        </span>
+
+
+                                    {% elif student.risk_level == "Low" %}
+
+                                        <span
+                                            class="risk-badge risk-low"
+                                        >
+                                            Low
+                                        </span>
+
+
+                                    {% else %}
+
+                                        <span
+                                            class="risk-badge risk-none"
+                                        >
+                                            Not Analyzed
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Risk Probability -->
+
+                                <td>
+
+                                    {% if student.risk_level == "High" %}
+
+                                        {{ student.probabilities.High }}%
+
+
+                                    {% elif student.risk_level == "Medium" %}
+
+                                        {{ student.probabilities.Medium }}%
+
+
+                                    {% elif student.risk_level == "Low" %}
+
+                                        {{ student.probabilities.Low }}%
+
+
+                                    {% else %}
+
+                                        -
+
+                                    {% endif %}
+
+                                </td>
+
+
+                                <!-- Action -->
+
+                                <td>
+
+                                    {% if student.prediction_id %}
+
+                                        <a
+                                            href="{{ url_for(
+                                                'student_analysis',
+                                                student_id=student.student_id
+                                            ) }}"
+                                            class="action-btn view-btn"
+                                        >
+                                            View Details
+                                        </a>
+
+                                    {% else %}
+
+                                        <form
+                                            action="{{ url_for(
+                                                'analyze_student',
+                                                student_id=student.student_id
+                                            ) }}"
+                                            method="POST"
+                                            style="display: inline;"
+                                        >
+
+                                            <button
+                                                type="submit"
+                                                class="action-btn analyze-btn"
+                                                style="border: none; cursor: pointer;"
+                                            >
+                                                Analyze
+                                            </button>
+
+                                        </form>
+
+                                    {% endif %}
+
+                                </td>
+
+
+                            </tr>
+
+                        {% else %}
+
+                            <tr>
+
+                                <td colspan="10">
+
+                                    No student records found.
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+</body>
+
+</html>
