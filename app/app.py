@@ -1151,6 +1151,10 @@ def student_analysis(student_id):
 @login_required
 def student_dashboard():
 
+    # -----------------------------------------------------
+    # Role protection
+    # -----------------------------------------------------
+
     if current_user.role != "student":
 
         flash(
@@ -1163,14 +1167,573 @@ def student_dashboard():
             url_for("faculty_dashboard")
         )
 
-    return jsonify({
-        "status": "success",
-        "message": "Student dashboard access granted.",
-        "username": current_user.username,
-        "role": current_user.role,
-        "student_id": current_user.student_id
-    })
 
+    connection = None
+    cursor = None
+
+    try:
+
+        # =================================================
+        # 1. GET LOGGED-IN STUDENT
+        # =================================================
+
+        connection = get_db_connection()
+
+        cursor = connection.cursor(
+            dictionary=True
+        )
+
+
+        cursor.execute(
+            """
+            SELECT
+                student_id,
+                register_number,
+                student_name,
+                email,
+                department,
+                semester
+            FROM students
+            WHERE student_id = %s;
+            """,
+            (
+                current_user.student_id,
+            )
+        )
+
+        student = cursor.fetchone()
+
+
+        if student is None:
+
+            flash(
+                "Student profile not found.",
+                "error"
+            )
+
+            return redirect(
+                url_for("logout")
+            )
+
+
+        student_id = student[
+            "student_id"
+        ]
+
+
+        # =================================================
+        # 2. GET LATEST ACADEMIC RECORD
+        # =================================================
+
+        cursor.execute(
+            """
+            SELECT
+                record_id,
+                semester,
+                previous_gpa,
+                attendance_pct,
+                internal_1,
+                internal_2,
+                assignment_avg,
+                assignment_completion_pct,
+                quiz_avg,
+                study_hours_weekly,
+                class_participation,
+                late_submissions,
+                created_at
+            FROM academic_records
+            WHERE student_id = %s
+            ORDER BY
+                created_at DESC,
+                record_id DESC
+            LIMIT 1;
+            """,
+            (
+                student_id,
+            )
+        )
+
+        academic = cursor.fetchone()
+
+
+        # =================================================
+        # 3. GET LATEST SAVED PREDICTION
+        # =================================================
+
+        cursor.execute(
+            """
+            SELECT
+                prediction_id,
+                record_id,
+                risk_level,
+                high_probability,
+                medium_probability,
+                low_probability,
+                predicted_at
+            FROM predictions
+            WHERE student_id = %s
+            ORDER BY
+                predicted_at DESC,
+                prediction_id DESC
+            LIMIT 1;
+            """,
+            (
+                student_id,
+            )
+        )
+
+        prediction = cursor.fetchone()
+
+
+        # =================================================
+        # 4. CONVERT ACADEMIC VALUES
+        # =================================================
+
+        if academic is not None:
+
+            academic_fields = [
+
+                "previous_gpa",
+
+                "attendance_pct",
+
+                "internal_1",
+
+                "internal_2",
+
+                "assignment_avg",
+
+                "assignment_completion_pct",
+
+                "quiz_avg",
+
+                "study_hours_weekly",
+
+                "class_participation"
+
+            ]
+
+
+            for field in academic_fields:
+
+                if academic.get(field) is not None:
+
+                    academic[field] = float(
+                        academic[field]
+                    )
+
+
+        # =================================================
+        # 5. PREPARE PREDICTION DATA
+        # =================================================
+
+        probabilities = None
+
+        risk_level = None
+
+        risk_message = None
+
+        priority = None
+
+
+        if prediction is not None:
+
+            probabilities = {
+
+                "High":
+                    (
+                        float(
+                            prediction[
+                                "high_probability"
+                            ]
+                        )
+                        if prediction[
+                            "high_probability"
+                        ] is not None
+                        else 0.0
+                    ),
+
+                "Medium":
+                    (
+                        float(
+                            prediction[
+                                "medium_probability"
+                            ]
+                        )
+                        if prediction[
+                            "medium_probability"
+                        ] is not None
+                        else 0.0
+                    ),
+
+                "Low":
+                    (
+                        float(
+                            prediction[
+                                "low_probability"
+                            ]
+                        )
+                        if prediction[
+                            "low_probability"
+                        ] is not None
+                        else 0.0
+                    )
+            }
+
+
+            risk_level = prediction[
+                "risk_level"
+            ]
+
+
+            # ---------------------------------------------
+            # Risk guidance
+            # ---------------------------------------------
+
+            if risk_level == "High":
+
+                priority = "Immediate"
+
+                risk_message = (
+                    "Your current academic indicators "
+                    "suggest a high risk level. Focus on "
+                    "the recommended improvement areas and "
+                    "seek faculty guidance regularly."
+                )
+
+
+            elif risk_level == "Medium":
+
+                priority = "Moderate"
+
+                risk_message = (
+                    "Your current academic indicators "
+                    "show some areas that need attention. "
+                    "Taking corrective action early can "
+                    "help prevent further academic decline."
+                )
+
+
+            else:
+
+                priority = "Routine"
+
+                risk_message = (
+                    "Your current academic performance "
+                    "is satisfactory. Continue maintaining "
+                    "consistent study and academic habits."
+                )
+
+        # =================================================
+        # 6. GET LATEST INTERVENTIONS + LATEST PROGRESS
+        # =================================================
+
+        interventions = []
+
+
+        if prediction is not None:
+
+            cursor.execute(
+                """
+                SELECT
+                    intervention_id,
+                    feature_name,
+                    intervention_title,
+                    recommendation,
+                    priority,
+                    status,
+                    created_at
+                FROM interventions
+                WHERE prediction_id = %s
+                ORDER BY intervention_id ASC;
+                """,
+                (
+                    prediction[
+                        "prediction_id"
+                    ],
+                )
+            )
+
+            intervention_rows = cursor.fetchall()
+
+
+            for intervention in intervention_rows:
+                
+                # -------------------------------------------------
+                # Get latest progress for this intervention
+                # -------------------------------------------------
+
+                cursor.execute(
+                    """
+                    SELECT
+                        progress_id,
+                        progress_note,
+                        status,
+                        updated_at
+                    FROM progress_tracking
+                    WHERE intervention_id = %s
+                    ORDER BY
+                        updated_at DESC,
+                        progress_id DESC
+                    LIMIT 1;
+                    """,
+                    (
+                        intervention[
+                            "intervention_id"
+                        ],
+                    )
+                )
+
+                latest_progress = cursor.fetchone()
+
+
+                # -------------------------------------------------
+                # Prepare intervention data
+                # -------------------------------------------------
+
+                interventions.append({
+
+                    "intervention_id":
+                        intervention[
+                            "intervention_id"
+                        ],
+
+                    "feature_name":
+                        intervention[
+                            "feature_name"
+                        ],
+
+                    "title":
+                        intervention[
+                            "intervention_title"
+                        ],
+
+                    "recommendation":
+                        intervention[
+                            "recommendation"
+                        ],
+
+                    "priority":
+                        intervention[
+                            "priority"
+                        ],
+
+                    "status":
+                        intervention[
+                            "status"
+                        ],
+
+                    "created_at":
+                        (
+                            intervention[
+                                "created_at"
+                            ].isoformat()
+                            if intervention[
+                                "created_at"
+                            ] is not None
+                            else None
+                        ),
+
+                    "latest_progress":
+                        (
+                            {
+                                "progress_id":
+                                    latest_progress[
+                                        "progress_id"
+                                    ],
+
+                                "note":
+                                    latest_progress[
+                                        "progress_note"
+                                    ],
+
+                                "status":
+                                    latest_progress[
+                                        "status"
+                                    ],
+
+                                "updated_at":
+                                    (
+                                        latest_progress[
+                                            "updated_at"
+                                        ].isoformat()
+                                        if latest_progress[
+                                            "updated_at"
+                                        ] is not None
+                                        else None
+                                    )
+                            }
+
+                            if latest_progress is not None
+
+                            else None
+                        )
+                })
+
+
+        # =================================================
+        # 7. GET PREDICTION HISTORY
+        # =================================================
+
+        prediction_history = []
+
+
+        cursor.execute(
+            """
+            SELECT
+                prediction_id,
+                risk_level,
+                high_probability,
+                medium_probability,
+                low_probability,
+                predicted_at
+            FROM predictions
+            WHERE student_id = %s
+            ORDER BY
+                predicted_at DESC,
+                prediction_id DESC
+            LIMIT 10;
+            """,
+            (
+                student_id,
+            )
+        )
+
+        history_rows = cursor.fetchall()
+
+
+        for history in history_rows:
+
+            prediction_history.append({
+
+                "prediction_id":
+                    history[
+                        "prediction_id"
+                    ],
+
+                "risk_level":
+                    history[
+                        "risk_level"
+                    ],
+
+                "high_probability":
+                    (
+                        float(
+                            history[
+                                "high_probability"
+                            ]
+                        )
+                        if history[
+                            "high_probability"
+                        ] is not None
+                        else 0.0
+                    ),
+
+                "medium_probability":
+                    (
+                        float(
+                            history[
+                                "medium_probability"
+                            ]
+                        )
+                        if history[
+                            "medium_probability"
+                        ] is not None
+                        else 0.0
+                    ),
+
+                "low_probability":
+                    (
+                        float(
+                            history[
+                                "low_probability"
+                            ]
+                        )
+                        if history[
+                            "low_probability"
+                        ] is not None
+                        else 0.0
+                    ),
+
+                "predicted_at":
+                    (
+                        history[
+                            "predicted_at"
+                        ].isoformat()
+                        if history[
+                            "predicted_at"
+                        ] is not None
+                        else None
+                    )
+            })
+
+
+        # =================================================
+        # 8. RENDER STUDENT DASHBOARD
+        # =================================================
+
+        return render_template(
+
+            "student_dashboard.html",
+
+            student=student,
+
+            academic=academic,
+
+            prediction=prediction,
+
+            probabilities=probabilities,
+
+            risk_level=risk_level,
+
+            priority=priority,
+
+            risk_message=risk_message,
+
+            interventions=interventions,
+
+            prediction_history=prediction_history
+        )
+
+
+    # =====================================================
+    # ERROR HANDLING
+    # =====================================================
+
+    except Exception as error:
+
+        print(
+            "Student dashboard error:",
+            error
+        )
+
+        return jsonify({
+
+            "status":
+                "error",
+
+            "message":
+                str(error)
+        }), 500
+
+
+    # =====================================================
+    # CLOSE DATABASE
+    # =====================================================
+
+    finally:
+
+        if cursor is not None:
+
+            cursor.close()
+
+
+        if (
+            connection is not None
+            and connection.is_connected()
+        ):
+
+            connection.close()
 # =========================================================
 # ACADEMIC RECORD HELPER
 # =========================================================
@@ -1266,6 +1829,7 @@ def get_latest_academic_record(
                 ]
             )
     }
+
 
     return record, student_data
 
@@ -1380,6 +1944,7 @@ def get_students():
         return jsonify({
             "status":
                 "success",
+
 
             "count":
                 len(students),

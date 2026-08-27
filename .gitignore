@@ -1,18 +1,25 @@
-# Virtual environment
-venv/
-.venv
-
-# Python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 
-# Environment variables
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables / secrets
 .env
 
-# VS Code
+# IDE
 .vscode/
+.idea/
 
-# OS files
-.DS_Store
-Thumbs.db
+# Python cache
+.pytest_cache/
+
+# Flask
+instance/
+
+# Logs
+*.log

@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Student Dashboard | Predictive Student Success Monitoring System
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            color: #333;
+        }
+
+
+        /* =================================================
+           HEADER
+        ================================================= */
+
+        .header {
+            background: #1f3c88;
+            color: white;
+
+            padding: 18px 30px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+
+        .header h1 {
+            font-size: 21px;
+        }
+
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+
+        .username {
+            font-size: 14px;
+        }
+
+
+        .header-btn {
+            background: white;
+            color: #1f3c88;
+
+            padding: 9px 15px;
+
+            border-radius: 5px;
+
+            text-decoration: none;
+
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+
+        .header-btn:hover {
+            background: #e8ecf6;
+        }
+
+
+        /* =================================================
+           MAIN CONTAINER
+        ================================================= */
+
+        .container {
+            width: 94%;
+            max-width: 1250px;
+
+            margin: 30px auto 50px;
+        }
+
+
+        /* =================================================
+           WELCOME
+        ================================================= */
+
+        .welcome {
+            margin-bottom: 25px;
+        }
+
+
+        .welcome h2 {
+            color: #1f3c88;
+            margin-bottom: 7px;
+        }
+
+
+        .welcome p {
+            color: #666;
+        }
+
+
+        /* =================================================
+           PROFILE CARD
+        ================================================= */
+
+        .profile-card {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .profile-card h2 {
+            color: #1f3c88;
+
+            margin-bottom: 15px;
+        }
+
+
+        .profile-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 15px;
+        }
+
+
+        .profile-item {
+            background: #f7f9fc;
+
+            padding: 14px;
+
+            border-radius: 7px;
+        }
+
+
+        .profile-label {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 6px;
+        }
+
+
+        .profile-value {
+            font-size: 16px;
+
+            font-weight: bold;
+        }
+
+
+        /* =================================================
+           RISK OVERVIEW
+        ================================================= */
+
+        .risk-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 25px;
+        }
+
+
+        .risk-card {
+            background: white;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .risk-card h3 {
+            color: #666;
+
+            font-size: 14px;
+
+            margin-bottom: 12px;
+        }
+
+
+        .risk-number {
+            font-size: 28px;
+
+            font-weight: bold;
+        }
+
+
+        .high-card {
+            border-left: 5px solid #dc3545;
+        }
+
+
+        .medium-card {
+            border-left: 5px solid #ffc107;
+        }
+
+
+        .low-card {
+            border-left: 5px solid #28a745;
+        }
+
+
+        .priority-card {
+            border-left: 5px solid #1f3c88;
+        }
+
+
+        /* =================================================
+           RISK BADGES
+        ================================================= */
+
+        .risk-badge {
+            display: inline-block;
+
+            padding: 9px 15px;
+
+            border-radius: 20px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+        }
+
+
+        .risk-high {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+
+        .risk-medium {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+
+        .risk-low {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        .risk-none {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+
+        /* =================================================
+           SECTION CARD
+        ================================================= */
+
+        .section-card {
+            background: white;
+
+            padding: 25px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.08);
+
+            margin-bottom: 25px;
+        }
+
+
+        .section-card h2 {
+            color: #1f3c88;
+
+            font-size: 20px;
+
+            margin-bottom: 20px;
+        }
+
+
+        /* =================================================
+           ACADEMIC PERFORMANCE
+        ================================================= */
+
+        .academic-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(180px, 1fr));
+
+            gap: 15px;
+        }
+
+
+        .academic-item {
+            background: #f7f9fc;
+
+            padding: 16px;
+
+            border-radius: 7px;
+        }
+
+
+        .academic-label {
+            color: #666;
+
+            font-size: 13px;
+
+            margin-bottom: 7px;
+        }
+
+
+        .academic-value {
+            font-size: 19px;
+
+            font-weight: bold;
+        }
+
+
+        /* =================================================
+           RISK GUIDANCE
+        ================================================= */
+
+        .risk-message {
+            background: #f7f9fc;
+
+            padding: 18px;
+
+            border-radius: 7px;
+
+            border-left: 4px solid #1f3c88;
+
+            line-height: 1.7;
+        }
+
+
+        /* =================================================
+           INTERVENTIONS
+        ================================================= */
+
+        .intervention {
+            border: 1px solid #e2e5e9;
+
+            border-radius: 8px;
+
+            padding: 18px;
+
+            margin-bottom: 15px;
+        }
+
+
+        .intervention:last-child {
+            margin-bottom: 0;
+        }
+
+
+        .intervention h3 {
+            color: #1f3c88;
+
+            margin-bottom: 10px;
+        }
+
+
+        .intervention p {
+            line-height: 1.6;
+
+            margin-top: 7px;
+        }
+
+
+        .intervention-meta {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+            margin-top: 13px;
+        }
+
+
+        .meta-badge {
+            padding: 5px 10px;
+
+            border-radius: 15px;
+
+            font-size: 12px;
+
+            font-weight: bold;
+        }
+
+
+        .priority-immediate {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+
+        .priority-moderate {
+            background: #fff3cd;
+            color: #664d03;
+        }
+
+
+        .priority-routine {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        .status-pending {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+
+        .status-progress {
+            background: #cfe2ff;
+            color: #084298;
+        }
+
+
+        .status-completed {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+
+        /* =================================================
+           LATEST PROGRESS
+        ================================================= */
+
+        .latest-progress {
+            margin-top: 18px;
+            padding: 15px;
+            background: #f7f9fc;
+            border-radius: 7px;
+            border-left: 4px solid #1f3c88;
+        }
+
+        .latest-progress h4 {
+            color: #1f3c88;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .progress-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .progress-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .progress-value {
+            font-size: 14px;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .progress-note {
+            margin-top: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            line-height: 1.5;
+        }
+
+        .no-progress {
+            margin-top: 18px;
+            padding: 13px;
+            background: #f7f9fc;
+            color: #777;
+            border-radius: 7px;
+            font-size: 13px;
+        }
+
+
+        /* =================================================
+           PREDICTION HISTORY
+        ================================================= */
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+
+        table {
+            width: 100%;
+
+            border-collapse: collapse;
+        }
+
+
+        th {
+            background: #f0f3f8;
+
+            padding: 13px;
+
+            text-align: left;
+
+            font-size: 14px;
+        }
+
+
+        td {
+            padding: 13px;
+
+            border-bottom:
+                1px solid #e5e5e5;
+
+            font-size: 14px;
+        }
+
+
+        tbody tr:hover {
+            background: #fafbfc;
+        }
+
+
+        .history-high {
+            color: #842029;
+
+            font-weight: bold;
+        }
+
+
+        .history-medium {
+            color: #664d03;
+
+            font-weight: bold;
+        }
+
+
+        .history-low {
+            color: #0f5132;
+
+            font-weight: bold;
+        }
+
+
+        /* =================================================
+           EMPTY STATE
+        ================================================= */
+
+        .empty-message {
+            background: #f7f9fc;
+
+            color: #777;
+
+            padding: 16px;
+
+            border-radius: 7px;
+        }
+
+
+        /* =================================================
+           RESPONSIVE
+        ================================================= */
+
+        @media (max-width: 768px) {
+
+            .header {
+                flex-direction: column;
+
+                align-items: flex-start;
+
+                gap: 12px;
+            }
+
+
+            .header-right {
+                width: 100%;
+
+                justify-content: space-between;
+            }
+
+
+            .container {
+                width: 96%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =================================================
+         HEADER
+    ================================================= -->
+
+    <header class="header">
+
+        <h1>
+            Predictive Student Success Monitoring System
+        </h1>
+
+
+        <div class="header-right">
+
+            <span class="username">
+                Welcome, {{ student.student_name }}
+            </span>
+
+
+            <a
+                href="{{ url_for('logout') }}"
+                class="header-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="container">
+
+
+        <!-- =================================================
+             WELCOME
+        ================================================= -->
+
+        <section class="welcome">
+
+            <h2>
+                My Student Dashboard
+            </h2>
+
+            <p>
+                View your academic performance,
+                risk assessment and personalized
+                improvement recommendations.
+            </p>
+
+        </section>
+
+
+
+        <!-- =================================================
+             STUDENT PROFILE
+        ================================================= -->
+
+        <section class="profile-card">
+
+            <h2>
+                My Profile
+            </h2>
+
+
+            <div class="profile-grid">
+
+
+                <div class="profile-item">
+
+                    <div class="profile-label">
+                        Student Name
+                    </div>
+
+                    <div class="profile-value">
+                        {{ student.student_name }}
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-label">
+                        Register Number
+                    </div>
+
+                    <div class="profile-value">
+                        {{ student.register_number }}
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-label">
+                        Department
+                    </div>
+
+                    <div class="profile-value">
+                        {{ student.department }}
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-label">
+                        Semester
+                    </div>
+
+                    <div class="profile-value">
+                        {{ student.semester }}
+                    </div>
+
+                </div>
+
+
+                <div class="profile-item">
+
+                    <div class="profile-label">
+                        Email
+                    </div>
+
+                    <div class="profile-value">
+                        {{ student.email }}
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             RISK OVERVIEW
+        ================================================== -->
+
+        <section class="risk-grid">
+
+
+            <!-- Risk Level -->
+
+            <div class="risk-card">
+
+                <h3>
+                    Current Risk Level
+                </h3>
+
+
+                {% if risk_level == "High" %}
+
+                    <span class="risk-badge risk-high">
+                        High Risk
+                    </span>
+
+
+                {% elif risk_level == "Medium" %}
+
+                    <span class="risk-badge risk-medium">
+                        Medium Risk
+                    </span>
+
+
+                {% elif risk_level == "Low" %}
+
+                    <span class="risk-badge risk-low">
+                        Low Risk
+                    </span>
+
+
+                {% else %}
+
+                    <span class="risk-badge risk-none">
+                        Not Analyzed
+                    </span>
+
+                {% endif %}
+
+            </div>
+
+
+
+            <!-- High -->
+
+            <div class="risk-card high-card">
+
+                <h3>
+                    High Risk Probability
+                </h3>
+
+                <div class="risk-number">
+
+                    {% if probabilities %}
+
+                        {{ probabilities.High }}%
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Medium -->
+
+            <div class="risk-card medium-card">
+
+                <h3>
+                    Medium Risk Probability
+                </h3>
+
+                <div class="risk-number">
+
+                    {% if probabilities %}
+
+                        {{ probabilities.Medium }}%
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Low -->
+
+            <div class="risk-card low-card">
+
+                <h3>
+                    Low Risk Probability
+                </h3>
+
+                <div class="risk-number">
+
+                    {% if probabilities %}
+
+                        {{ probabilities.Low }}%
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Priority -->
+
+            <div class="risk-card priority-card">
+
+                <h3>
+                    Intervention Priority
+                </h3>
+
+                <div class="risk-number">
+
+                    {% if priority %}
+
+                        {{ priority }}
+
+                    {% else %}
+
+                        -
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+
+        <!-- =================================================
+             RISK GUIDANCE
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                Academic Guidance
+            </h2>
+
+
+            {% if risk_message %}
+
+                <div class="risk-message">
+
+                    {{ risk_message }}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-message">
+
+                    Your academic performance has not
+                    been analyzed yet.
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             ACADEMIC PERFORMANCE
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                My Academic Performance
+            </h2>
+
+
+            {% if academic %}
+
+                <div class="academic-grid">
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Previous GPA
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.previous_gpa }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Attendance
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.attendance_pct }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Internal Assessment 1
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.internal_1 }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Internal Assessment 2
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.internal_2 }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Assignment Average
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.assignment_avg }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Assignment Completion
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.assignment_completion_pct }}%
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Quiz Average
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.quiz_avg }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Weekly Study Hours
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.study_hours_weekly }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Class Participation
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.class_participation }}
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="academic-item">
+
+                        <div class="academic-label">
+                            Late Submissions
+                        </div>
+
+                        <div class="academic-value">
+                            {{ academic.late_submissions }}
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-message">
+
+                    No academic records are currently
+                    available.
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             INTERVENTIONS
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                My Personalized Interventions
+            </h2>
+
+
+            {% if interventions %}
+
+
+                {% for intervention in interventions %}
+
+                    <div class="intervention">
+
+
+                        <h3>
+                            {{ loop.index }}.
+                            {{ intervention.title }}
+                        </h3>
+
+
+                        <p>
+
+                            <strong>
+                                Focus Area:
+                            </strong>
+
+                            {{ intervention.feature_name }}
+
+                        </p>
+
+
+                        <p>
+
+                            <strong>
+                                Recommendation:
+                            </strong>
+
+                            {{ intervention.recommendation }}
+
+                        </p>
+
+
+                        <div class="intervention-meta">
+
+
+                            {% if intervention.priority == "Immediate" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-immediate
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+
+                            {% elif intervention.priority == "Moderate" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-moderate
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+
+                            {% else %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        priority-routine
+                                    "
+                                >
+                                    Priority:
+                                    {{ intervention.priority }}
+                                </span>
+
+                            {% endif %}
+
+
+
+                            {% if intervention.status == "Completed" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-completed
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+
+                            {% elif intervention.status == "In Progress" %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-progress
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+
+                            {% else %}
+
+                                <span
+                                    class="
+                                        meta-badge
+                                        status-pending
+                                    "
+                                >
+                                    Status:
+                                    {{ intervention.status }}
+                                </span>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                        <!-- =================================================
+                             LATEST PROGRESS
+                        ================================================== -->
+
+                        {% if intervention.latest_progress %}
+
+                            <div class="latest-progress">
+
+                                <h4>
+                                    Latest Progress
+                                </h4>
+
+                                <div class="progress-grid">
+
+                                    <div class="progress-item">
+                                        <div class="progress-label">
+                                            Progress ID
+                                        </div>
+                                        <div class="progress-value">
+                                            {{ intervention.latest_progress.progress_id }}
+                                        </div>
+                                    </div>
+
+                                    <div class="progress-item">
+                                        <div class="progress-label">
+                                            Status
+                                        </div>
+                                        <div class="progress-value">
+                                            {{ intervention.latest_progress.status }}
+                                        </div>
+                                    </div>
+
+                                    <div class="progress-item">
+                                        <div class="progress-label">
+                                            Updated At
+                                        </div>
+                                        <div class="progress-value">
+                                            {{ intervention.latest_progress.updated_at }}
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="progress-note">
+                                    <div class="progress-label">
+                                        Progress Note
+                                    </div>
+                                    <div class="progress-value">
+                                        {% if intervention.latest_progress.note %}
+                                            {{ intervention.latest_progress.note }}
+                                        {% else %}
+                                            No progress note provided.
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        {% else %}
+
+                            <div class="no-progress">
+                                No progress has been recorded for this intervention yet.
+                            </div>
+
+                        {% endif %}
+
+
+                    </div>
+
+                {% endfor %}
+
+
+            {% else %}
+
+                <div class="empty-message">
+
+                    No personalized interventions
+                    are currently available.
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+
+        <!-- =================================================
+             PREDICTION HISTORY
+        ================================================== -->
+
+        <section class="section-card">
+
+            <h2>
+                My Prediction History
+            </h2>
+
+
+            {% if prediction_history %}
+
+                <div class="table-wrapper">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Prediction ID
+                                </th>
+
+                                <th>
+                                    Risk Level
+                                </th>
+
+                                <th>
+                                    High %
+                                </th>
+
+                                <th>
+                                    Medium %
+                                </th>
+
+                                <th>
+                                    Low %
+                                </th>
+
+                                <th>
+                                    Predicted At
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody>
+
+                            {% for history in prediction_history %}
+
+                                <tr>
+
+                                    <td>
+                                        {{ history.prediction_id }}
+                                    </td>
+
+
+                                    <td>
+
+                                        {% if history.risk_level == "High" %}
+
+                                            <span
+                                                class="history-high"
+                                            >
+                                                High
+                                            </span>
+
+
+                                        {% elif history.risk_level == "Medium" %}
+
+                                            <span
+                                                class="history-medium"
+                                            >
+                                                Medium
+                                            </span>
+
+
+                                        {% else %}
+
+                                            <span
+                                                class="history-low"
+                                            >
+                                                Low
+                                            </span>
+
+                                        {% endif %}
+
+                                    </td>
+
+
+                                    <td>
+                                        {{ history.high_probability }}%
+                                    </td>
+
+
+                                    <td>
+                                        {{ history.medium_probability }}%
+                                    </td>
+
+
+                                    <td>
+                                        {{ history.low_probability }}%
+                                    </td>
+
+
+                                    <td>
+                                        {{ history.predicted_at }}
+                                    </td>
+
+                                </tr>
+
+                            {% endfor %}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+            {% else %}
+
+                <div class="empty-message">
+
+                    No prediction history is available yet.
+
+                </div>
+
+            {% endif %}
+
+        </section>
+
+
+    </main>
+
+
+</body>
+
+</html>
