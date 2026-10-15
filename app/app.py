@@ -99,7 +99,8 @@ def get_db_connection():
         ),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME")
+        database=os.getenv("DB_NAME"),
+        use_pure=True
     )
 
 
@@ -1183,7 +1184,6 @@ def student_dashboard():
             dictionary=True
         )
 
-
         cursor.execute(
             """
             SELECT
@@ -1203,7 +1203,6 @@ def student_dashboard():
 
         student = cursor.fetchone()
 
-
         if student is None:
 
             flash(
@@ -1214,7 +1213,6 @@ def student_dashboard():
             return redirect(
                 url_for("logout")
             )
-
 
         student_id = student[
             "student_id"
@@ -1292,27 +1290,16 @@ def student_dashboard():
         if academic is not None:
 
             academic_fields = [
-
                 "previous_gpa",
-
                 "attendance_pct",
-
                 "internal_1",
-
                 "internal_2",
-
                 "assignment_avg",
-
                 "assignment_completion_pct",
-
                 "quiz_avg",
-
                 "study_hours_weekly",
-
                 "class_participation"
-
             ]
-
 
             for field in academic_fields:
 
@@ -1328,13 +1315,9 @@ def student_dashboard():
         # =================================================
 
         probabilities = None
-
         risk_level = None
-
         risk_message = None
-
         priority = None
-
 
         if prediction is not None:
 
@@ -1380,11 +1363,9 @@ def student_dashboard():
                     )
             }
 
-
             risk_level = prediction[
                 "risk_level"
             ]
-
 
             # ---------------------------------------------
             # Risk guidance
@@ -1401,7 +1382,6 @@ def student_dashboard():
                     "seek faculty guidance regularly."
                 )
 
-
             elif risk_level == "Medium":
 
                 priority = "Moderate"
@@ -1413,7 +1393,6 @@ def student_dashboard():
                     "help prevent further academic decline."
                 )
 
-
             else:
 
                 priority = "Routine"
@@ -1424,12 +1403,12 @@ def student_dashboard():
                     "consistent study and academic habits."
                 )
 
+
         # =================================================
         # 6. GET LATEST INTERVENTIONS + LATEST PROGRESS
         # =================================================
 
         interventions = []
-
 
         if prediction is not None:
 
@@ -1456,12 +1435,7 @@ def student_dashboard():
 
             intervention_rows = cursor.fetchall()
 
-
             for intervention in intervention_rows:
-                
-                # -------------------------------------------------
-                # Get latest progress for this intervention
-                # -------------------------------------------------
 
                 cursor.execute(
                     """
@@ -1486,12 +1460,7 @@ def student_dashboard():
 
                 latest_progress = cursor.fetchone()
 
-
-                # -------------------------------------------------
-                # Prepare intervention data
-                # -------------------------------------------------
-
-                interventions.append({
+                intervention_data = {
 
                     "intervention_id":
                         intervention[
@@ -1534,41 +1503,45 @@ def student_dashboard():
                             else None
                         ),
 
-                    "latest_progress":
-                        (
-                            {
-                                "progress_id":
-                                    latest_progress[
-                                        "progress_id"
-                                    ],
+                    "latest_progress": None
+                }
 
-                                "note":
-                                    latest_progress[
-                                        "progress_note"
-                                    ],
+                if latest_progress is not None:
 
-                                "status":
-                                    latest_progress[
-                                        "status"
-                                    ],
+                    intervention_data[
+                        "latest_progress"
+                    ] = {
 
-                                "updated_at":
-                                    (
-                                        latest_progress[
-                                            "updated_at"
-                                        ].isoformat()
-                                        if latest_progress[
-                                            "updated_at"
-                                        ] is not None
-                                        else None
-                                    )
-                            }
+                        "progress_id":
+                            latest_progress[
+                                "progress_id"
+                            ],
 
-                            if latest_progress is not None
+                        "note":
+                            latest_progress[
+                                "progress_note"
+                            ],
 
-                            else None
-                        )
-                })
+                        "status":
+                            latest_progress[
+                                "status"
+                            ],
+
+                        "updated_at":
+                            (
+                                latest_progress[
+                                    "updated_at"
+                                ].isoformat()
+                                if latest_progress[
+                                    "updated_at"
+                                ] is not None
+                                else None
+                            )
+                    }
+
+                interventions.append(
+                    intervention_data
+                )
 
 
         # =================================================
@@ -1576,7 +1549,6 @@ def student_dashboard():
         # =================================================
 
         prediction_history = []
-
 
         cursor.execute(
             """
@@ -1600,7 +1572,6 @@ def student_dashboard():
         )
 
         history_rows = cursor.fetchall()
-
 
         for history in history_rows:
 
@@ -1673,25 +1644,15 @@ def student_dashboard():
         # =================================================
 
         return render_template(
-
             "student_dashboard.html",
-
             student=student,
-
             academic=academic,
-
             prediction=prediction,
-
             probabilities=probabilities,
-
             risk_level=risk_level,
-
             priority=priority,
-
             risk_message=risk_message,
-
             interventions=interventions,
-
             prediction_history=prediction_history
         )
 
@@ -1708,7 +1669,6 @@ def student_dashboard():
         )
 
         return jsonify({
-
             "status":
                 "error",
 
@@ -1724,16 +1684,15 @@ def student_dashboard():
     finally:
 
         if cursor is not None:
-
             cursor.close()
-
 
         if (
             connection is not None
             and connection.is_connected()
         ):
-
             connection.close()
+
+
 # =========================================================
 # ACADEMIC RECORD HELPER
 # =========================================================
