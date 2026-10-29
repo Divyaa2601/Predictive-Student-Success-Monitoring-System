@@ -10,6 +10,8 @@ env/
 
 # Environment variables / secrets
 .env
+.env.*
+!.env.example
 
 # IDE
 .vscode/
@@ -23,3 +25,13 @@ instance/
 
 # Logs
 *.log
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Generated Python files
+*.egg-info/
+
+# Local database backups
+*.sql.gz
+*.bak

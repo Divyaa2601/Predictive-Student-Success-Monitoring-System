@@ -1,94 +1,293 @@
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <title>Login | Student Success Monitoring</title>
 
-    <title>
-        Login | Predictive Student Success Monitoring System
-    </title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc, #e0f2fe);
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .login-layout {
+            width: 100%;
+            max-width: 980px;
+            min-height: 560px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: #ffffff;
+            border-radius: 22px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12);
+        }
+
+        .welcome-panel {
+            background: linear-gradient(145deg, #172554, #1d4ed8);
+            color: white;
+            padding: 55px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .brand-icon {
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 30px;
+            margin-bottom: 28px;
+        }
+
+        .welcome-panel h1 {
+            font-size: 31px;
+            line-height: 1.3;
+            margin: 0 0 18px;
+        }
+
+        .welcome-panel p {
+            color: #dbeafe;
+            line-height: 1.8;
+            font-size: 15px;
+            margin: 0;
+        }
+
+        .feature-list {
+            margin-top: 32px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin: 15px 0;
+            color: #eff6ff;
+            font-size: 14px;
+        }
+
+        .login-panel {
+            padding: 55px 42px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-panel h2 {
+            margin: 0 0 10px;
+            font-size: 29px;
+            color: #0f172a;
+        }
+
+        .subtitle {
+            color: #64748b;
+            line-height: 1.6;
+            margin: 0 0 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 21px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 9px;
+            color: #334155;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
+            background: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 9px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .login-button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .message {
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message.error,
+        .message.danger,
+        .message.warning {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .message.success {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .message.info {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .footer-note {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 26px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                padding: 16px;
+            }
+
+            .login-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-panel {
+                padding: 30px 26px;
+            }
+
+            .welcome-panel h1 {
+                font-size: 25px;
+            }
+
+            .brand-icon {
+                margin-bottom: 16px;
+            }
+
+            .feature-list {
+                display: none;
+            }
+
+            .login-panel {
+                padding: 35px 26px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <main class="login-layout">
 
-    <h1>Predictive Student Success Monitoring System</h1>
+        <section class="welcome-panel">
+            <div class="brand-icon" aria-hidden="true">✦</div>
 
-    <h2>Login</h2>
+            <h1>Predictive Student Success Monitoring System</h1>
 
+            <p>
+                Supporting student success through academic insights,
+                risk prediction, and personalized interventions.
+            </p>
 
-    <!-- Flash Messages -->
+            <ul class="feature-list">
+                <li>✓ Academic performance monitoring</li>
+                <li>✓ Machine learning-based risk prediction</li>
+                <li>✓ Personalized academic support</li>
+            </ul>
+        </section>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
+        <section class="login-panel">
+            <h2>Welcome back</h2>
 
-        {% if messages %}
+            <p class="subtitle">
+                Sign in to access your student monitoring dashboard.
+            </p>
 
-            {% for category, message in messages %}
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="message {{ category }}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
 
-                <p>
-                    {{ message }}
-                </p>
+            <form method="POST" action="{{ url_for('login') }}">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                        autofocus
+                    >
+                </div>
 
-            {% endfor %}
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
 
-        {% endif %}
+                <button type="submit" class="login-button">
+                    Sign in
+                </button>
+            </form>
 
-    {% endwith %}
+            <div class="footer-note">
+                Student Success Monitoring · Secure Access
+            </div>
+        </section>
 
-
-    <!-- Login Form -->
-
-    <form
-        method="POST"
-        action="{{ url_for('login') }}"
-    >
-
-        <div>
-
-            <label for="username">
-                Username
-            </label>
-
-            <input
-                type="text"
-                id="username"
-                name="username"
-                required
-            >
-
-        </div>
-
-        <br>
-
-
-        <div>
-
-            <label for="password">
-                Password
-            </label>
-
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required
-            >
-
-        </div>
-
-        <br>
-
-
-        <button type="submit">
-            Login
-        </button>
-
-    </form>
-
+    </main>
 </body>
-
 </html>

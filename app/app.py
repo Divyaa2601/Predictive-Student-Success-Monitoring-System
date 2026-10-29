@@ -1,5 +1,6 @@
 import os
 import sys
+import math
 
 from flask import (
     Flask,
@@ -518,9 +519,15 @@ def faculty_dashboard():
                         p2.prediction_id DESC
                     LIMIT 1
                 )
+            WHERE s.department = (
+                SELECT f.department
+                FROM faculty f
+                WHERE f.user_id = %s
+            )
 
             ORDER BY s.student_id;
-            """
+            """,
+            (current_user.id,)
         )
 
         student_rows = cursor.fetchall()
@@ -1459,6 +1466,21 @@ def student_dashboard():
                 )
 
                 latest_progress = cursor.fetchone()
+                cursor.execute(
+                    """
+                    SELECT progress_note
+                    FROM progress_tracking
+                    WHERE intervention_id = %s
+                        AND progress_note IS NOT NULL
+                        AND TRIM(progress_note) <> ''
+                    ORDER BY updated_at DESC, progress_id DESC
+                    LIMIT 1;
+                    """,
+                    (intervention["intervention_id"],)
+                )
+
+                latest_note = cursor.fetchone()
+
 
                 intervention_data = {
 
@@ -1517,10 +1539,13 @@ def student_dashboard():
                                 "progress_id"
                             ],
 
-                        "note":
+                        "note":(
                             latest_progress[
                                 "progress_note"
-                            ],
+                            ]
+                            if latest_note is not None
+                            else None
+                        ),
 
                         "status":
                             latest_progress[
@@ -1810,11 +1835,40 @@ def home():
 
 
 # =========================================================
+# API AUTHORIZATION HELPER
+# =========================================================
+
+def api_access_error(student_id=None, faculty_only=False):
+    """Return a JSON authorization error, or None when access is allowed."""
+    if not current_user.is_authenticated:
+        return jsonify({"status": "error", "message": "Login required."}), 401
+
+    if faculty_only:
+        if current_user.role != "faculty":
+            return jsonify({"status": "error", "message": "Faculty access required."}), 403
+        return None
+
+    if current_user.role == "faculty":
+        return None
+
+    if current_user.role == "student" and current_user.student_id is not None:
+        if int(current_user.student_id) == int(student_id):
+            return None
+
+    return jsonify({"status": "error", "message": "You are not authorized to access this student's data."}), 403
+
+
+# =========================================================
 # DATABASE TEST ROUTE
 # =========================================================
 
 @app.route("/api/test-db")
+@login_required
 def test_database():
+
+    access_error = api_access_error(faculty_only=True)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -1871,7 +1925,12 @@ def test_database():
 # =========================================================
 
 @app.route("/api/students")
+@login_required
 def get_students():
+
+    access_error = api_access_error(faculty_only=True)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -1941,7 +2000,12 @@ def get_students():
 @app.route(
     "/api/predict/<int:student_id>"
 )
+@login_required
 def predict_student(student_id):
+
+    access_error = api_access_error(student_id=student_id)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -2100,7 +2164,12 @@ def predict_student(student_id):
     "/api/predict/<int:student_id>/save",
     methods=["POST"]
 )
+@login_required
 def save_student_prediction(student_id):
+
+    access_error = api_access_error(faculty_only=True)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -2669,7 +2738,12 @@ def analyze_student(student_id):
     "/api/students/<int:student_id>/prediction-history",
     methods=["GET"]
 )
+@login_required
 def get_prediction_history(student_id):
+
+    access_error = api_access_error(student_id=student_id)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -2853,6 +2927,260 @@ def get_prediction_history(student_id):
 
 
 # =========================================================
+# UPDATE ACADEMIC SCORES AND RECALCULATE STUDENT RISK
+# =========================================================
+
+@app.route(
+    "/api/students/<int:student_id>/academic-record",
+    methods=["POST"]
+)
+@login_required
+def update_academic_record(student_id):
+
+    access_error = api_access_error(
+        student_id=student_id,
+        faculty_only=True
+    )
+    if access_error:
+        return access_error
+
+    connection = None
+    cursor = None
+
+    try:
+        data = request.get_json(silent=True)
+
+        if not data:
+            return jsonify({
+                "status": "error",
+                "message": "Academic data is required."
+            }), 400
+
+        # Fields used by the existing ML predictor.
+        fields = {
+            "previous_gpa": (0, 10),
+            "attendance_pct": (0, 100),
+            "internal_1": (0, 100),
+            "internal_2": (0, 100),
+            "assignment_avg": (0, 100),
+            "assignment_completion_pct": (0, 100),
+            "quiz_avg": (0, 100),
+            "study_hours_weekly": (0, 168),
+            "class_participation": (0, 100),
+            "late_submissions": (0, 100000)
+        }
+
+        values = {}
+
+        for field, (minimum, maximum) in fields.items():
+            if field not in data or data[field] in ("", None):
+                return jsonify({
+                    "status": "error",
+                    "message": f"{field} is required."
+                }), 400
+
+            try:
+                value = float(data[field])
+            except (TypeError, ValueError):
+                return jsonify({
+                    "status": "error",
+                    "message": f"{field} must be numeric."
+                }), 400
+
+            if not math.isfinite(value) or not minimum <= value <= maximum:
+                return jsonify({
+                    "status": "error",
+                    "message": (
+                        f"{field} must be between "
+                        f"{minimum} and {maximum}."
+                    )
+                }), 400
+
+            if field == "late_submissions" and not value.is_integer():
+                return jsonify({
+                    "status": "error",
+                    "message": "Late submissions must be a whole number."
+                }), 400
+
+            values[field] = (
+                int(value)
+                if field == "late_submissions"
+                else value
+            )
+
+        connection = get_db_connection()
+        cursor = connection.cursor(dictionary=True)
+
+        # Update the latest academic record for this student.
+        cursor.execute(
+            """
+            SELECT record_id
+            FROM academic_records
+            WHERE student_id = %s
+            ORDER BY created_at DESC, record_id DESC
+            LIMIT 1
+            FOR UPDATE;
+            """,
+            (student_id,)
+        )
+
+        record = cursor.fetchone()
+
+        if record is None:
+            connection.rollback()
+            return jsonify({
+                "status": "error",
+                "message": "No academic record exists for this student."
+            }), 404
+
+        cursor.execute(
+            """
+            UPDATE academic_records
+            SET
+                previous_gpa = %s,
+                attendance_pct = %s,
+                internal_1 = %s,
+                internal_2 = %s,
+                assignment_avg = %s,
+                assignment_completion_pct = %s,
+                quiz_avg = %s,
+                study_hours_weekly = %s,
+                class_participation = %s,
+                late_submissions = %s
+            WHERE record_id = %s AND student_id = %s;
+            """,
+            (
+                values["previous_gpa"],
+                values["attendance_pct"],
+                values["internal_1"],
+                values["internal_2"],
+                values["assignment_avg"],
+                values["assignment_completion_pct"],
+                values["quiz_avg"],
+                values["study_hours_weekly"],
+                values["class_participation"],
+                values["late_submissions"],
+                record["record_id"],
+                student_id
+            )
+        )
+
+        # Reload the saved values and run the existing ML pipeline.
+        updated_record, student_data = get_latest_academic_record(
+            cursor,
+            student_id
+        )
+
+        analysis = generate_interventions(student_data)
+
+        risk_level = analysis["risk_level"]
+        probabilities = analysis["probabilities"]
+
+        # Save a new prediction linked to the updated academic record.
+        cursor.execute(
+            """
+            INSERT INTO predictions (
+                student_id,
+                record_id,
+                risk_level,
+                high_probability,
+                medium_probability,
+                low_probability
+            )
+            VALUES (%s, %s, %s, %s, %s, %s);
+            """,
+            (
+                student_id,
+                updated_record["record_id"],
+                risk_level,
+                probabilities.get("High", 0),
+                probabilities.get("Medium", 0),
+                probabilities.get("Low", 0)
+            )
+        )
+
+        prediction_id = cursor.lastrowid
+
+        # Save the new prediction's contributing factors.
+        for rank, factor in enumerate(
+            analysis["interventions"],
+            start=1
+        ):
+            cursor.execute(
+                """
+                INSERT INTO risk_factors (
+                    prediction_id,
+                    feature_name,
+                    feature_value,
+                    shap_impact,
+                    factor_rank
+                )
+                VALUES (%s, %s, %s, %s, %s);
+                """,
+                (
+                    prediction_id,
+                    factor["feature"],
+                    factor["value"],
+                    factor["shap_impact"],
+                    rank
+                )
+            )
+
+        # Create recommendations for the new prediction.
+        # Existing intervention and progress-history records remain intact.
+        for intervention in analysis["interventions"]:
+            cursor.execute(
+                """
+                INSERT INTO interventions (
+                    prediction_id,
+                    feature_name,
+                    intervention_title,
+                    recommendation,
+                    priority
+                )
+                VALUES (%s, %s, %s, %s, %s);
+                """,
+                (
+                    prediction_id,
+                    intervention["feature"],
+                    intervention["title"],
+                    intervention["recommendation"],
+                    analysis["priority"]
+                )
+            )
+
+        connection.commit()
+
+        return jsonify({
+            "status": "success",
+            "message": "Academic scores updated and risk recalculated.",
+            "student_id": student_id,
+            "record_id": updated_record["record_id"],
+            "prediction_id": prediction_id,
+            "risk_level": risk_level,
+            "probabilities": probabilities,
+            "priority": analysis["priority"]
+        })
+
+    except Exception as error:
+        if connection is not None:
+            connection.rollback()
+
+        app.logger.exception("Academic update and prediction failed")
+
+        return jsonify({
+            "status": "error",
+            "message": str(error)
+        }), 500
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if connection is not None and connection.is_connected():
+            connection.close()
+
+# =========================================================
 # UPDATE INTERVENTION PROGRESS
 # =========================================================
 
@@ -2860,9 +3188,14 @@ def get_prediction_history(student_id):
     "/api/interventions/<int:intervention_id>/progress",
     methods=["POST"]
 )
+@login_required
 def update_intervention_progress(
     intervention_id
 ):
+
+    access_error = api_access_error(faculty_only=True)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -3090,7 +3423,12 @@ def update_intervention_progress(
     "/api/students/<int:student_id>/progress",
     methods=["GET"]
 )
+@login_required
 def get_student_progress(student_id):
+
+    access_error = api_access_error(student_id=student_id)
+    if access_error:
+        return access_error
 
     connection = None
     cursor = None
@@ -3321,5 +3659,5 @@ def get_student_progress(student_id):
 if __name__ == "__main__":
 
     app.run(
-        debug=True
+        debug=False
     )
