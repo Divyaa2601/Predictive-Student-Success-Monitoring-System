@@ -89,23 +89,33 @@ login_manager.login_message_category = "warning"
 # =========================================================
 
 
-def get_db_connection():
-    ssl_ca_path = os.path.join(
-        BASE_DIR,
-        os.getenv("DB_SSL_CA", "certs/ca.pem")
-    )
 
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST"),
-        port=int(os.getenv("DB_PORT", 4000)),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD"),
-        database=os.getenv("DB_NAME"),
-        ssl_ca=ssl_ca_path,
-        ssl_verify_cert=True,
-        ssl_verify_identity=True,
-        use_pure=True
-    )
+def get_db_connection():
+    db_host = os.getenv("DB_HOST")
+
+    db_config = {
+        "host": db_host,
+        "port": int(os.getenv("DB_PORT", 3306)),
+        "user": os.getenv("DB_USER"),
+        "password": os.getenv("DB_PASSWORD"),
+        "database": os.getenv("DB_NAME"),
+        "use_pure": True
+    }
+
+    # Enable SSL only for remote database connections
+    if db_host not in ("localhost", "127.0.0.1"):
+        ssl_ca_path = os.path.join(
+            BASE_DIR,
+            os.getenv("DB_SSL_CA", "certs/ca.pem")
+        )
+
+        db_config.update({
+            "ssl_ca": ssl_ca_path,
+            "ssl_verify_cert": True,
+            "ssl_verify_identity": True
+        })
+
+    return mysql.connector.connect(**db_config)
 
 
 # =========================================================
@@ -475,6 +485,7 @@ def faculty_dashboard():
         # and latest saved prediction
         # -------------------------------------------------
 
+        
         cursor.execute(
             """
             SELECT
@@ -501,32 +512,33 @@ def faculty_dashboard():
 
             FROM students s
 
-            LEFT JOIN academic_records ar
-                ON ar.record_id = (
-                    SELECT ar2.record_id
-                    FROM academic_records ar2
-                    WHERE ar2.student_id = s.student_id
-                    ORDER BY
-                        ar2.created_at DESC,
-                        ar2.record_id DESC
-                    LIMIT 1
-                )
+            JOIN faculty f
+                ON f.user_id = %s
+                AND f.department = s.department
 
-            LEFT JOIN predictions p
-                ON p.prediction_id = (
-                    SELECT p2.prediction_id
-                    FROM predictions p2
-                    WHERE p2.student_id = s.student_id
-                    ORDER BY
-                        p2.predicted_at DESC,
-                        p2.prediction_id DESC
-                    LIMIT 1
-                )
-            WHERE s.department = (
-                SELECT f.department
-                FROM faculty f
-                WHERE f.user_id = %s
-            )
+            LEFT JOIN (
+                SELECT
+                    ar1.*,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY ar1.student_id
+                        ORDER BY ar1.created_at DESC, ar1.record_id DESC
+                    ) AS rn
+                FROM academic_records ar1
+            ) ar
+                ON ar.student_id = s.student_id
+                AND ar.rn = 1
+
+            LEFT JOIN (
+                SELECT
+                    p1.*,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY p1.student_id
+                        ORDER BY p1.predicted_at DESC, p1.prediction_id DESC
+                    ) AS rn
+                FROM predictions p1
+            ) p
+                ON p.student_id = s.student_id
+                AND p.rn = 1
 
             ORDER BY s.student_id;
             """,
