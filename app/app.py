@@ -88,19 +88,22 @@ login_manager.login_message_category = "warning"
 # DATABASE CONNECTION
 # =========================================================
 
+
 def get_db_connection():
+    ssl_ca_path = os.path.join(
+        BASE_DIR,
+        os.getenv("DB_SSL_CA", "certs/ca.pem")
+    )
 
     return mysql.connector.connect(
         host=os.getenv("DB_HOST"),
-        port=int(
-            os.getenv(
-                "DB_PORT",
-                3306
-            )
-        ),
+        port=int(os.getenv("DB_PORT", 4000)),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME"),
+        ssl_ca=ssl_ca_path,
+        ssl_verify_cert=True,
+        ssl_verify_identity=True,
         use_pure=True
     )
 
