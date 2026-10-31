@@ -1399,6 +1399,12 @@
                                 <th>
                                     Predicted At
                                 </th>
+                                <th>
+                                    Faculty Intervention
+                                </th>
+                                <th>
+                                    Current Status
+                                </th>
 
                             </tr>
 
@@ -1467,7 +1473,13 @@
                                     <td>
                                         {{ history.predicted_at }}
                                     </td>
-
+                                    <td>
+                                        {{ history.intervention_title or "No intervention" }}
+                                    </td>
+                                    
+                                    <td>
+                                        {{ history.intervention_status or "Not updated" }}
+                                    </td>
                                 </tr>
 
                             {% endfor %}

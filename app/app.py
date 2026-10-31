@@ -1593,22 +1593,63 @@ def student_dashboard():
         cursor.execute(
             """
             SELECT
-                prediction_id,
-                risk_level,
-                high_probability,
-                medium_probability,
-                low_probability,
-                predicted_at
-            FROM predictions
-            WHERE student_id = %s
+                p.prediction_id,
+                p.risk_level,
+                p.high_probability,
+                p.medium_probability,
+                p.low_probability,
+                p.predicted_at,
+                latest.intervention_title,
+                COALESCE(
+                    latest.progress_status,
+                    latest.intervention_status
+                ) AS intervention_status
+            FROM predictions p
+            LEFT JOIN (
+                SELECT *
+                FROM (
+                    SELECT
+                        i.prediction_id,
+                        i.intervention_id,
+                        i.intervention_title,
+                        i.status AS intervention_status,
+                        pt.status AS progress_status,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY i.prediction_id
+                            ORDER BY
+                                CASE
+                                    WHEN pt.progress_id IS NULL THEN 1
+                                    ELSE 0
+                                END ASC,
+                                pt.updated_at DESC,
+                                pt.progress_id DESC,
+                                i.intervention_id DESC
+                        ) AS rn
+                    FROM interventions i
+                    LEFT JOIN (
+                        SELECT
+                            pt1.*,
+                            ROW_NUMBER() OVER (
+                                PARTITION BY pt1.intervention_id
+                                ORDER BY
+                                    pt1.updated_at DESC,
+                                    pt1.progress_id DESC
+                            ) AS progress_rn
+                        FROM progress_tracking pt1
+                    ) pt
+                        ON pt.intervention_id = i.intervention_id
+                        AND pt.progress_rn = 1
+                ) ranked
+                WHERE rn = 1
+            ) latest
+                ON latest.prediction_id = p.prediction_id
+            WHERE p.student_id = %s
             ORDER BY
-                predicted_at DESC,
-                prediction_id DESC
+                p.predicted_at DESC,
+                p.prediction_id DESC
             LIMIT 10;
             """,
-            (
-                student_id,
-            )
+            (student_id,)
         )
 
         history_rows = cursor.fetchall()
@@ -1675,7 +1716,10 @@ def student_dashboard():
                             "predicted_at"
                         ] is not None
                         else None
-                    )
+                    ),
+                "intervention_title": history["intervention_title"],
+
+                "intervention_status": history["intervention_status"],
             })
 
 
